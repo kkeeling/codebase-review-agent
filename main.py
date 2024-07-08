@@ -106,7 +106,7 @@ File Types Distribution:
 File Structure:
 {json.dumps(codebase_analysis['file_list'], indent=2)}
 
-Please suggest a specific file or directory that would be a good starting point for analyzing this codebase, and explain why you think it's a good choice.
+Please suggest a specific file that would be a good starting point for analyzing this codebase. Respond only with the file name, without any additional explanation or text.
 """
 
     messages = [
@@ -125,7 +125,7 @@ Please suggest a specific file or directory that would be a good starting point 
     response = requests.post(ANTHROPIC_API_URL, headers=headers, json=data)
     response.raise_for_status()
 
-    return response.json()["content"][0]["text"]
+    return response.json()["content"][0]["text"].strip()
 
 def get_file_content(file_path: str) -> str:
     encodings = ['utf-8', 'latin-1', 'ascii']
