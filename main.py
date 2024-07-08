@@ -49,10 +49,6 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
         with open(os.path.join(root_folder, '.gitignore'), 'r') as f:
             gitignore_patterns = [line.strip() for line in f if line.strip() and not line.startswith('#')]
 
-    print(Fore.GREEN + "Files and directories will be ignored:")
-    for pattern in gitignore_patterns:
-        print(Fore.GREEN + f"  {pattern}")
-
     for root, dirs, files in os.walk(root_folder):
         # Remove hidden directories from the dirs list
         dirs[:] = [d for d in dirs if not d.startswith('.')]
