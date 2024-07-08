@@ -19,10 +19,8 @@ def get_user_input():
     print(Fore.GREEN + "Welcome to the Interactive Codebase Review Agent!")
     print(Fore.GREEN + "Please provide the following information:")
     
-    # description = input(Fore.YELLOW + "1. Brief description of the codebase, including the type of application: ")
-    # technologies = input(Fore.YELLOW + "2. Main technologies used (comma-separated): ")
-    description = "foo"
-    technologies = "bar"
+    description = input(Fore.YELLOW + "1. Brief description of the codebase, including the type of application: ")
+    technologies = input(Fore.YELLOW + "2. Main technologies used (comma-separated): ")
     
     root_folder = input(Fore.YELLOW + "3. Root folder of the project on your local file system: ")
     
@@ -43,41 +41,29 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
     file_count = 0
     total_lines = 0
     file_types = {}
-    file_structure = {}
+    file_list = []
 
-    # If root folder contains a .gitignore file, idenfity those files and directories
+    # If root folder contains a .gitignore file, identify those files and directories
+    gitignore_patterns = []
     if os.path.exists(os.path.join(root_folder, '.gitignore')):
         with open(os.path.join(root_folder, '.gitignore'), 'r') as f:
-            gitignore_lines = f.readlines()
+            gitignore_patterns = [line.strip() for line in f if line.strip() and not line.startswith('#')]
 
-    # List the files that will be ignored from .gitignore
     print(Fore.GREEN + "Files and directories will be ignored:")
-    for line in gitignore_lines:
-        print(Fore.GREEN + f"  {line.strip()}")
-
-    # Idenfity hidden folders and files (those that start with ".")
-    hidden_files = [file for file in os.listdir(root_folder) if file.startswith('.')]
-    print(Fore.GREEN + "Hidden files and directories (also ignored):")
-    for file in hidden_files:
-        print(Fore.GREEN + f"  {file}")
+    for pattern in gitignore_patterns:
+        print(Fore.GREEN + f"  {pattern}")
 
     for root, dirs, files in os.walk(root_folder):
         # Remove hidden directories from the dirs list
         dirs[:] = [d for d in dirs if not d.startswith('.')]
-        
-        current_dir = file_structure
-        path_parts = os.path.relpath(root, root_folder).split(os.sep)
-        for part in path_parts:
-            if part not in current_dir:
-                current_dir[part] = {"files": [], "dirs": {}}
-            current_dir = current_dir[part]["dirs"]
 
         for file in files:
-            # Skip hidden files
-            if file.startswith('.'):
+            # Skip hidden files and files matching gitignore patterns
+            if file.startswith('.') or any(file.endswith(pattern) for pattern in gitignore_patterns):
                 continue
             
             file_path = os.path.join(root, file)
+            relative_path = os.path.relpath(file_path, root_folder)
             file_count += 1
             
             _, extension = os.path.splitext(file)
@@ -87,15 +73,16 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                     total_lines += content.count('\n') + 1
-                current_dir["files"].append(file)
+                    file_list.append({"path": relative_path, "contents": content})
             except Exception as e:
-                print(Fore.RED + f"Warning: Could not read file {file_path}. Error: {str(e)}")
+                print(Fore.YELLOW + f"Warning: Could not read file {file_path}. Error: {str(e)}")
+                file_list.append({"path": relative_path, "contents": f"Error: Unable to read file. {str(e)}"})
 
     return {
         "file_count": file_count,
         "total_lines": total_lines,
         "file_types": file_types,
-        "file_structure": file_structure
+        "file_list": file_list
     }
 
 def get_claude_suggestion(description: str, technologies: str, codebase_analysis: Dict[str, Any]) -> str:
@@ -117,7 +104,7 @@ File Types Distribution:
 {json.dumps(codebase_analysis['file_types'], indent=2)}
 
 File Structure:
-{json.dumps(codebase_analysis['file_structure'], indent=2)}
+{json.dumps(codebase_analysis['file_list'], indent=2)}
 
 Please suggest a specific file or directory that would be a good starting point for analyzing this codebase, and explain why you think it's a good choice.
 """
@@ -141,11 +128,14 @@ Please suggest a specific file or directory that would be a good starting point 
     return response.json()["content"][0]["text"]
 
 def get_file_content(file_path: str) -> str:
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return f.read()
-    except Exception as e:
-        return f"Error reading file: {str(e)}"
+    encodings = ['utf-8', 'latin-1', 'ascii']
+    for encoding in encodings:
+        try:
+            with open(file_path, 'r', encoding=encoding) as f:
+                return f.read()
+        except UnicodeDecodeError:
+            continue
+    return f"Error: Unable to read file {file_path} with any of the attempted encodings."
 
 def analyze_file(file_path: str, file_content: str, description: str, technologies: str) -> str:
     headers = {
