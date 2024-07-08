@@ -3,6 +3,10 @@ import sys
 import json
 import requests
 from typing import List, Dict, Any
+from colorama import init, Fore, Style
+
+# Initialize colorama
+init(autoreset=True)
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:
@@ -12,22 +16,25 @@ ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 MODEL_NAME = "claude-3-sonnet-20240229"
 
 def get_user_input():
-    print("Welcome to the Interactive Codebase Review Agent!")
-    print("Please provide the following information:")
+    print(Fore.GREEN + "Welcome to the Interactive Codebase Review Agent!")
+    print(Fore.GREEN + "Please provide the following information:")
     
-    description = input("1. Brief description of the codebase, including the type of application: ")
-    technologies = input("2. Main technologies used (comma-separated): ")
-    root_folder = input("3. Root folder of the project on your local file system: ")
+    # description = input(Fore.YELLOW + "1. Brief description of the codebase, including the type of application: ")
+    # technologies = input(Fore.YELLOW + "2. Main technologies used (comma-separated): ")
+    description = "foo"
+    technologies = "bar"
+    
+    root_folder = input(Fore.YELLOW + "3. Root folder of the project on your local file system: ")
     
     return description, technologies, root_folder
 
 def validate_input(description: str, technologies: str, root_folder: str) -> bool:
     if not description or not technologies or not root_folder:
-        print("Error: All fields are required.")
+        print(Fore.RED + "Error: All fields are required.")
         return False
     
     if not os.path.isdir(root_folder):
-        print(f"Error: The specified root folder '{root_folder}' does not exist.")
+        print(Fore.RED + f"Error: The specified root folder '{root_folder}' does not exist.")
         return False
     
     return True
@@ -37,6 +44,22 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
     total_lines = 0
     file_types = {}
     file_structure = {}
+
+    # If root folder contains a .gitignore file, idenfity those files and directories
+    if os.path.exists(os.path.join(root_folder, '.gitignore')):
+        with open(os.path.join(root_folder, '.gitignore'), 'r') as f:
+            gitignore_lines = f.readlines()
+
+    # List the files that will be ignored from .gitignore
+    print(Fore.GREEN + "Files and directories will be ignored:")
+    for line in gitignore_lines:
+        print(Fore.GREEN + f"  {line.strip()}")
+
+    # Idenfity hidden folders and files (those that start with ".")
+    hidden_files = [file for file in os.listdir(root_folder) if file.startswith('.')]
+    print(Fore.GREEN + "Hidden files and directories (also ignored):")
+    for file in hidden_files:
+        print(Fore.GREEN + f"  {file}")
 
     for root, dirs, files in os.walk(root_folder):
         # Remove hidden directories from the dirs list
@@ -66,7 +89,7 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
                     total_lines += content.count('\n') + 1
                 current_dir["files"].append(file)
             except Exception as e:
-                print(f"Warning: Could not read file {file_path}. Error: {str(e)}")
+                print(Fore.RED + f"Warning: Could not read file {file_path}. Error: {str(e)}")
 
     return {
         "file_count": file_count,
@@ -175,17 +198,17 @@ def main():
     if not validate_input(description, technologies, root_folder):
         sys.exit(1)
     
-    print("\nAnalyzing codebase structure...")
+    print(Fore.GREEN + "\nAnalyzing codebase structure...")
     codebase_analysis = analyze_codebase_structure(root_folder)
     
-    print("\nGetting suggestion from Claude...")
+    print(Fore.GREEN + "\nGetting suggestion from Claude...")
     claude_suggestion = get_claude_suggestion(description, technologies, codebase_analysis)
     
-    print("\nClaude's suggestion for starting point:")
-    print(claude_suggestion)
+    print(Fore.GREEN + "\nClaude's suggestion for starting point:")
+    print(Fore.GREEN + claude_suggestion)
     
     while True:
-        file_to_analyze = input("\nEnter the path of the file you want to analyze (or 'q' to quit): ")
+        file_to_analyze = input(Fore.YELLOW + "\nEnter the path of the file you want to analyze (or 'q' to quit): ")
         
         if file_to_analyze.lower() == 'q':
             break
@@ -193,33 +216,33 @@ def main():
         full_file_path = os.path.join(root_folder, file_to_analyze)
         
         if not os.path.isfile(full_file_path):
-            print(f"Error: The file '{full_file_path}' does not exist.")
+            print(Fore.RED + f"Error: The file '{full_file_path}' does not exist.")
             continue
         
         if os.path.basename(full_file_path).startswith('.'):
-            print(f"Error: '{full_file_path}' is a hidden file and will be skipped.")
+            print(Fore.RED + f"Error: '{full_file_path}' is a hidden file and will be skipped.")
             continue
         
-        print(f"\nAnalyzing file: {file_to_analyze}")
+        print(Fore.GREEN + f"\nAnalyzing file: {file_to_analyze}")
         file_content = get_file_content(full_file_path)
         analysis = analyze_file(file_to_analyze, file_content, description, technologies)
         
-        print("\nFile Analysis:")
-        print(analysis)
+        print(Fore.GREEN + "\nFile Analysis:")
+        print(Fore.GREEN + analysis)
         
-        continue_analysis = input("\nDo you want to analyze another file? (y/n): ")
+        continue_analysis = input(Fore.YELLOW + "\nDo you want to analyze another file? (y/n): ")
         if continue_analysis.lower() != 'y':
             break
     
-    print("\nCodebase Review Summary:")
-    print(f"Description: {description}")
-    print(f"Technologies: {technologies}")
-    print(f"Root folder: {root_folder}")
-    print(f"Total files: {codebase_analysis['file_count']}") 
-    print(f"Total lines of code: {codebase_analysis['total_lines']}")
-    print("File types distribution:")
+    print(Fore.GREEN + "\nCodebase Review Summary:")
+    print(Fore.GREEN + f"Description: {description}")
+    print(Fore.GREEN + f"Technologies: {technologies}")
+    print(Fore.GREEN + f"Root folder: {root_folder}")
+    print(Fore.GREEN + f"Total files: {codebase_analysis['file_count']}") 
+    print(Fore.GREEN + f"Total lines of code: {codebase_analysis['total_lines']}")
+    print(Fore.GREEN + "File types distribution:")
     for ext, count in sorted(codebase_analysis['file_types'].items(), key=lambda x: x[1], reverse=True):
-        print(f"  {ext or 'No extension'}: {count}")
+        print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
 
 if __name__ == "__main__":
     main()
