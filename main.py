@@ -39,6 +39,9 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
     file_structure = {}
 
     for root, dirs, files in os.walk(root_folder):
+        # Remove hidden directories from the dirs list
+        dirs[:] = [d for d in dirs if not d.startswith('.')]
+        
         current_dir = file_structure
         path_parts = os.path.relpath(root, root_folder).split(os.sep)
         for part in path_parts:
@@ -47,6 +50,10 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
             current_dir = current_dir[part]["dirs"]
 
         for file in files:
+            # Skip hidden files
+            if file.startswith('.'):
+                continue
+            
             file_path = os.path.join(root, file)
             file_count += 1
             
@@ -189,6 +196,10 @@ def main():
             print(f"Error: The file '{full_file_path}' does not exist.")
             continue
         
+        if os.path.basename(full_file_path).startswith('.'):
+            print(f"Error: '{full_file_path}' is a hidden file and will be skipped.")
+            continue
+        
         print(f"\nAnalyzing file: {file_to_analyze}")
         file_content = get_file_content(full_file_path)
         analysis = analyze_file(file_to_analyze, file_content, description, technologies)
@@ -204,7 +215,7 @@ def main():
     print(f"Description: {description}")
     print(f"Technologies: {technologies}")
     print(f"Root folder: {root_folder}")
-    print(f"Total files: {codebase_analysis['file_count']}")
+    print(f"Total files: {codebase_analysis['file_count']}") 
     print(f"Total lines of code: {codebase_analysis['total_lines']}")
     print("File types distribution:")
     for ext, count in sorted(codebase_analysis['file_types'].items(), key=lambda x: x[1], reverse=True):
