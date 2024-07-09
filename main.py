@@ -4,6 +4,7 @@ import json
 import requests
 from typing import List, Dict, Any
 from colorama import init, Fore, Style
+from halo import Halo
 
 # Initialize colorama
 init(autoreset=True)
@@ -118,8 +119,9 @@ Please suggest a specific file that would be a good starting point for analyzing
         "messages": messages
     }
 
-    response = requests.post(ANTHROPIC_API_URL, headers=headers, json=data)
-    response.raise_for_status()
+    with Halo(text='Waiting for Claude\'s response...', spinner='dots'):
+        response = requests.post(ANTHROPIC_API_URL, headers=headers, json=data)
+        response.raise_for_status()
 
     return response.json()["content"][0]["text"].strip()
 
@@ -173,8 +175,9 @@ Your analysis should be thorough and provide valuable insights for the developme
         "messages": messages
     }
 
-    response = requests.post(ANTHROPIC_API_URL, headers=headers, json=data)
-    response.raise_for_status()
+    with Halo(text='Analyzing file...', spinner='dots'):
+        response = requests.post(ANTHROPIC_API_URL, headers=headers, json=data)
+        response.raise_for_status()
 
     return response.json()["content"][0]["text"]
 
@@ -185,7 +188,8 @@ def main():
         sys.exit(1)
     
     print(Fore.GREEN + "\nAnalyzing codebase structure...")
-    codebase_analysis = analyze_codebase_structure(root_folder)
+    with Halo(text='Analyzing codebase structure...', spinner='dots'):
+        codebase_analysis = analyze_codebase_structure(root_folder)
     
     print(Fore.GREEN + "\nGetting suggestion from Claude...")
     claude_suggestion = get_claude_suggestion(description, technologies, codebase_analysis)
