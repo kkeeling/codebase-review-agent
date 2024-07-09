@@ -237,7 +237,7 @@ def run_sequential_agentic_flow():
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
 
 def step_1_triggering():
-    pass
+    print(Fore.BLUE + "No triggering step for this workflow as it is executed manually on the command line.")
 
 def step_2_retrieval():
     pass
