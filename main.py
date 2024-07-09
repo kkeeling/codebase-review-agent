@@ -29,14 +29,12 @@ def get_user_input():
     print(Fore.GREEN + "Please provide the following information:")
     
     description = input(Fore.YELLOW + "1. Brief description of the codebase, including the type of application: ")
-    technologies = input(Fore.YELLOW + "2. Main technologies used (comma-separated): ")
+    root_folder = input(Fore.YELLOW + "2. Root folder of the project on your local file system: ")
     
-    root_folder = input(Fore.YELLOW + "3. Root folder of the project on your local file system: ")
-    
-    return description, technologies, root_folder
+    return description, root_folder
 
-def validate_input(description: str, technologies: str, root_folder: str) -> bool:
-    if not description or not technologies or not root_folder:
+def validate_input(description: str, root_folder: str) -> bool:
+    if not description or not root_folder:
         print(Fore.RED + "Error: All fields are required.")
         return False
     
@@ -156,8 +154,8 @@ def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
 
     step_1_triggering()
-    description, technologies, root_folder = step_2_retrieval()
-    step_3_agentic(description, technologies, root_folder)
+    description, root_folder = step_2_retrieval()
+    step_3_agentic(description, root_folder)
     step_4_action()
     step_5_learn()
     step_6_notify()
@@ -169,11 +167,11 @@ def step_2_retrieval():
     print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
 
     while True:
-        description, technologies, root_folder = get_user_input()
-        if validate_input(description, technologies, root_folder):
-            return description, technologies, root_folder
+        description, root_folder = get_user_input()
+        if validate_input(description, root_folder):
+            return description, root_folder
 
-def step_3_agentic(description, technologies, root_folder):
+def step_3_agentic(description, root_folder):
     print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
 
     # Analyze codebase structure
@@ -182,7 +180,6 @@ def step_3_agentic(description, technologies, root_folder):
 
     print(Fore.GREEN + "\nCodebase Review Summary:")
     print(Fore.GREEN + f"Description: {description}")
-    print(Fore.GREEN + f"Technologies: {technologies}")
     print(Fore.GREEN + f"Root folder: {root_folder}")
     print(Fore.GREEN + f"Total files: {codebase_analysis['file_count']}") 
     print(Fore.GREEN + f"Total lines of code: {codebase_analysis['total_lines']}")
