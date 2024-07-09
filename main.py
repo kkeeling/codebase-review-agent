@@ -183,13 +183,10 @@ Your analysis should be thorough and provide valuable insights for the developme
 
 def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
-    
+
     step_1_triggering()
 
     description, technologies, root_folder = step_2_retrieval()
-    
-    if not validate_input(description, technologies, root_folder):
-        sys.exit(1)
     
     print(Fore.GREEN + "\nAnalyzing codebase structure...")
     with Halo(text='Analyzing codebase structure...', spinner='dots'):
@@ -243,11 +240,11 @@ def step_1_triggering():
 
 def step_2_retrieval():
     print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
+
     while True:
         description, technologies, root_folder = get_user_input()
         if validate_input(description, technologies, root_folder):
             return description, technologies, root_folder
-        print(Fore.RED + "Invalid input. Please try again.")
 
 def step_3_agentic(root_folder):
     print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
