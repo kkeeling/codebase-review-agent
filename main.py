@@ -182,6 +182,8 @@ Your analysis should be thorough and provide valuable insights for the developme
     return response.json()["content"][0]["text"]
 
 def main():
+    step_1_triggering()
+    
     description, technologies, root_folder = get_user_input()
     
     if not validate_input(description, technologies, root_folder):
