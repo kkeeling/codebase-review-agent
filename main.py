@@ -255,4 +255,4 @@ def step_6_notify():
     pass
 
 if __name__ == "__main__":
-    main()
+    run_sequential_agentic_flow()
