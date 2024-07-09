@@ -243,8 +243,11 @@ def step_1_triggering():
 
 def step_2_retrieval():
     print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
-    description, technologies, root_folder = get_user_input()
-    return description, technologies, root_folder
+    while True:
+        description, technologies, root_folder = get_user_input()
+        if validate_input(description, technologies, root_folder):
+            return description, technologies, root_folder
+        print(Fore.RED + "Invalid input. Please try again.")
 
 def step_3_agentic(root_folder):
     print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
