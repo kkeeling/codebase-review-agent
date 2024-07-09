@@ -182,7 +182,10 @@ Your analysis should be thorough and provide valuable insights for the developme
     return response.json()["content"][0]["text"]
 
 def run_sequential_agentic_flow():
+    print(Fore.BLUE + "Running sequential agentic flow...")
+    
     step_1_triggering()
+
     description, technologies, root_folder = step_2_retrieval()
     
     if not validate_input(description, technologies, root_folder):
@@ -236,22 +239,27 @@ def run_sequential_agentic_flow():
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
 
 def step_1_triggering():
-    print(Fore.BLUE + "No triggering step for this workflow as it is executed manually on the command line.")
+    print(Fore.BLUE + "Step 1 Triggering: No triggering step for this workflow as it is executed manually on the command line.")
 
 def step_2_retrieval():
+    print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
     description, technologies, root_folder = get_user_input()
     return description, technologies, root_folder
 
-def step_3_agentic():
-    pass
+def step_3_agentic(root_folder):
+    print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
+    codebase_analysis = analyze_codebase_structure(root_folder)
+    return codebase_analysis
 
 def step_4_action():
-    pass
+    print(Fore.BLUE + "Step 4 Action: Analyzing file...")
 
 def step_5_learn():
+    print(Fore.BLUE + "Step 5 Learn: No learning step in this workflow.")
     pass
 
 def step_6_notify():
+    print(Fore.BLUE + "Step 6 Notify: No notification step in this workflow.")
     pass
 
 if __name__ == "__main__":
