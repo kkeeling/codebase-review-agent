@@ -234,5 +234,8 @@ def main():
     for ext, count in sorted(codebase_analysis['file_types'].items(), key=lambda x: x[1], reverse=True):
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
 
+def step_1_triggering():
+    pass
+
 if __name__ == "__main__":
     main()
