@@ -237,5 +237,20 @@ def main():
 def step_1_triggering():
     pass
 
+def step_2_retrieval():
+    pass
+
+def step_3_agentic():
+    pass
+
+def step_4_action():
+    pass
+
+def step_5_learn():
+    pass
+
+def step_6_notify():
+    pass
+
 if __name__ == "__main__":
     main()
