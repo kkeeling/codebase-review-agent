@@ -183,9 +183,7 @@ Your analysis should be thorough and provide valuable insights for the developme
 
 def run_sequential_agentic_flow():
     step_1_triggering()
-    step_2_retrieval()
-    
-    description, technologies, root_folder = get_user_input()
+    description, technologies, root_folder = step_2_retrieval()
     
     if not validate_input(description, technologies, root_folder):
         sys.exit(1)
@@ -241,7 +239,8 @@ def step_1_triggering():
     print(Fore.BLUE + "No triggering step for this workflow as it is executed manually on the command line.")
 
 def step_2_retrieval():
-    pass
+    description, technologies, root_folder = get_user_input()
+    return description, technologies, root_folder
 
 def step_3_agentic():
     pass
