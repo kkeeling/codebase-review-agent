@@ -185,10 +185,22 @@ def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
 
     step_1_triggering()
-
     description, technologies, root_folder = step_2_retrieval()
-    
-    print(Fore.GREEN + "\nAnalyzing codebase structure...")
+    step_3_agentic(description, technologies, root_folder)
+
+def step_1_triggering():
+    print(Fore.BLUE + "Step 1 Triggering: No triggering step for this workflow as it is executed manually on the command line.")
+
+def step_2_retrieval():
+    print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
+
+    while True:
+        description, technologies, root_folder = get_user_input()
+        if validate_input(description, technologies, root_folder):
+            return description, technologies, root_folder
+
+def step_3_agentic(description, technologies, root_folder):
+    print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
     with Halo(text='Analyzing codebase structure...', spinner='dots'):
         codebase_analysis = analyze_codebase_structure(root_folder)
     
@@ -234,22 +246,6 @@ def run_sequential_agentic_flow():
     print(Fore.GREEN + "File types distribution:")
     for ext, count in sorted(codebase_analysis['file_types'].items(), key=lambda x: x[1], reverse=True):
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
-
-def step_1_triggering():
-    print(Fore.BLUE + "Step 1 Triggering: No triggering step for this workflow as it is executed manually on the command line.")
-
-def step_2_retrieval():
-    print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
-
-    while True:
-        description, technologies, root_folder = get_user_input()
-        if validate_input(description, technologies, root_folder):
-            return description, technologies, root_folder
-
-def step_3_agentic(root_folder):
-    print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
-    codebase_analysis = analyze_codebase_structure(root_folder)
-    return codebase_analysis
 
 def step_4_action():
     print(Fore.BLUE + "Step 4 Action: Analyzing file...")
