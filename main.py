@@ -185,13 +185,13 @@ def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
 
     step_1_triggering()
-    description, technologies, root_folder = step_2_retrieval()
+    description, technologies, root_folder = step_2_retrieval_root_folder()
     step_3_agentic(description, technologies, root_folder)
 
 def step_1_triggering():
     print(Fore.BLUE + "Step 1 Triggering: No triggering step for this workflow as it is executed manually on the command line.")
 
-def step_2_retrieval():
+def step_2_retrieval_root_folder():
     print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
 
     while True:
