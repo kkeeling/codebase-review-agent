@@ -181,7 +181,7 @@ Your analysis should be thorough and provide valuable insights for the developme
 
     return response.json()["content"][0]["text"]
 
-def run_sequential_agentic_flow():
+def main():
     step_1_triggering()
     
     description, technologies, root_folder = get_user_input()
@@ -255,4 +255,4 @@ def step_6_notify():
     pass
 
 if __name__ == "__main__":
-    run_sequential_agentic_flow()
+    main()
