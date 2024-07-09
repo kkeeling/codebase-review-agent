@@ -115,7 +115,7 @@ def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str
     """
     
     # Add up to 5 file contents to the prompt
-    for file in codebase['file_list'][:5]:
+    for file in codebase['file_list']:
         prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
     
     safety_settings = [
