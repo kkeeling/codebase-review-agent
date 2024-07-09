@@ -5,6 +5,8 @@ import requests
 from typing import List, Dict, Any
 from colorama import init, Fore, Style
 from halo import Halo
+import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 # Initialize colorama
 init(autoreset=True)
@@ -15,6 +17,12 @@ if not ANTHROPIC_API_KEY:
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 MODEL_NAME = "claude-3-sonnet-20240229"
+
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    raise ValueError("Please set the GOOGLE_API_KEY environment variable.")
+
+genai.configure(api_key=GOOGLE_API_KEY)
 
 def get_user_input():
     print(Fore.GREEN + "Welcome to the Interactive Codebase Review Agent!")
@@ -75,68 +83,74 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
                 print(Fore.YELLOW + f"Warning: Could not read file {file_path}. Error: {str(e)}")
                 file_list.append({"path": relative_path, "contents": f"Error: Unable to read file. {str(e)}"})
 
-    return {
+    codebase_analysis = {
         "file_count": file_count,
         "total_lines": total_lines,
         "file_types": file_types,
         "file_list": file_list
     }
 
-def get_file_content(file_path: str) -> str:
-    encodings = ['utf-8', 'latin-1', 'ascii']
-    for encoding in encodings:
-        try:
-            with open(file_path, 'r', encoding=encoding) as f:
-                return f.read()
-        except UnicodeDecodeError:
-            continue
-    return f"Error: Unable to read file {file_path} with any of the attempted encodings."
+    # Analyze codebase with Google Gemini
+    gemini_analysis = analyze_codebase_with_google_gemini(description, codebase_analysis)
+    codebase_analysis["gemini_analysis"] = gemini_analysis
 
-def analyze_file(file_path: str, file_content: str, description: str, technologies: str) -> str:
-    headers = {
-        "Content-Type": "application/json",
-        "X-API-Key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
-    }
+    return codebase_analysis
 
-    prompt = f"""Analyze the following file from a codebase:
-
-File: {file_path}
-Description of codebase: {description}
-Technologies used: {technologies}
-
-File content:
-{file_content}
-
-Please provide a detailed analysis of this file, including:
-1. The purpose and functionality of the code in this file
-2. How it fits into the overall structure of the codebase
-3. Any notable coding patterns or practices used
-4. Potential areas for improvement or optimization
-5. Any security concerns or best practices that should be implemented
-6. Suggestions for better documentation or testing, if applicable
-
-Your analysis should be thorough and provide valuable insights for the development team.
-"""
-
-    messages = [
+def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str:
+    model = genai.GenerativeModel('gemini-pro')
+    
+    prompt = f"""
+    Analyze the following codebase:
+    
+    Description: {description}
+    Total files: {codebase['file_count']}
+    Total lines of code: {codebase['total_lines']}
+    File types distribution: {codebase['file_types']}
+    
+    Please provide a comprehensive analysis of the codebase, including:
+    1. Overall structure and organization
+    2. Potential improvements or best practices that could be applied
+    3. Any security concerns or performance issues
+    4. Suggestions for better code maintainability and scalability
+    
+    Here's a sample of the code files:
+    """
+    
+    # Add up to 5 file contents to the prompt
+    for file in codebase['file_list'][:5]:
+        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
+    
+    safety_settings = [
         {
-            "role": "user",
-            "content": prompt
-        }
+            "category": HarmCategory.HARM_CATEGORY_HARASSMENT,
+            "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+            "category": HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+            "category": HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+            "category": HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
     ]
 
-    data = {
-        "model": MODEL_NAME,
-        "max_tokens": 2000,
-        "messages": messages
-    }
+    response = model.generate_content(
+        prompt,
+        safety_settings=safety_settings,
+        generation_config=genai.types.GenerationConfig(
+            temperature=0.2,
+            top_p=1,
+            top_k=32,
+            max_output_tokens=2048,
+        )
+    )
 
-    with Halo(text='Analyzing file...', spinner='dots'):
-        response = requests.post(ANTHROPIC_API_URL, headers=headers, json=data)
-        response.raise_for_status()
-
-    return response.json()["content"][0]["text"]
+    return response.text
 
 def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
@@ -161,6 +175,8 @@ def step_2_retrieval():
 
 def step_3_agentic(description, technologies, root_folder):
     print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
+
+    # Analyze codebase structure
     with Halo(text='Analyzing codebase structure...', spinner='dots'):
         codebase_analysis = analyze_codebase_structure(root_folder)
 
@@ -171,8 +187,12 @@ def step_3_agentic(description, technologies, root_folder):
     print(Fore.GREEN + f"Total files: {codebase_analysis['file_count']}") 
     print(Fore.GREEN + f"Total lines of code: {codebase_analysis['total_lines']}")
     print(Fore.GREEN + "File types distribution:")
+
     for ext, count in sorted(codebase_analysis['file_types'].items(), key=lambda x: x[1], reverse=True):
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
+
+    print(Fore.GREEN + "\nGoogle Gemini Analysis:")
+    print(Fore.GREEN + codebase_analysis['gemini_analysis'])
 
 def step_4_action():
     print(Fore.BLUE + "Step 4 Action: TBD")
