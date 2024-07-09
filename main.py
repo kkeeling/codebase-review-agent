@@ -82,49 +82,6 @@ def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
         "file_list": file_list
     }
 
-def get_claude_suggestion(description: str, technologies: str, codebase_analysis: Dict[str, Any]) -> str:
-    headers = {
-        "Content-Type": "application/json",
-        "X-API-Key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
-    }
-
-    prompt = f"""Based on the following information about a codebase, suggest a good starting point for analysis:
-
-Description: {description}
-Technologies: {technologies}
-
-File Count: {codebase_analysis['file_count']}
-Total Lines of Code: {codebase_analysis['total_lines']}
-
-File Types Distribution:
-{json.dumps(codebase_analysis['file_types'], indent=2)}
-
-File Structure:
-{json.dumps(codebase_analysis['file_list'], indent=2)}
-
-Please suggest a specific file that would be a good starting point for analyzing this codebase. Respond only with the file name, without any additional explanation or text.
-"""
-
-    messages = [
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ]
-
-    data = {
-        "model": MODEL_NAME,
-        "max_tokens": 1000,
-        "messages": messages
-    }
-
-    with Halo(text='Waiting for Claude\'s response...', spinner='dots'):
-        response = requests.post(ANTHROPIC_API_URL, headers=headers, json=data)
-        response.raise_for_status()
-
-    return response.json()["content"][0]["text"].strip()
-
 def get_file_content(file_path: str) -> str:
     encodings = ['utf-8', 'latin-1', 'ascii']
     for encoding in encodings:
@@ -185,13 +142,16 @@ def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
 
     step_1_triggering()
-    description, technologies, root_folder = step_2_retrieval_root_folder()
+    description, technologies, root_folder = step_2_retrieval()
     step_3_agentic(description, technologies, root_folder)
+    step_4_action()
+    step_5_learn()
+    step_6_notify()
 
 def step_1_triggering():
     print(Fore.BLUE + "Step 1 Triggering: No triggering step for this workflow as it is executed manually on the command line.")
 
-def step_2_retrieval_root_folder():
+def step_2_retrieval():
     print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
 
     while True:
@@ -203,40 +163,7 @@ def step_3_agentic(description, technologies, root_folder):
     print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
     with Halo(text='Analyzing codebase structure...', spinner='dots'):
         codebase_analysis = analyze_codebase_structure(root_folder)
-    
-    print(Fore.GREEN + "\nGetting suggestion from Claude...")
-    claude_suggestion = get_claude_suggestion(description, technologies, codebase_analysis)
-    
-    print(Fore.GREEN + "\nClaude's suggestion for starting point:")
-    print(Fore.GREEN + claude_suggestion)
-    
-    while True:
-        file_to_analyze = input(Fore.YELLOW + "\nEnter the path of the file you want to analyze (or 'q' to quit): ")
-        
-        if file_to_analyze.lower() == 'q':
-            break
-        
-        full_file_path = os.path.join(root_folder, file_to_analyze)
-        
-        if not os.path.isfile(full_file_path):
-            print(Fore.RED + f"Error: The file '{full_file_path}' does not exist.")
-            continue
-        
-        if os.path.basename(full_file_path).startswith('.'):
-            print(Fore.RED + f"Error: '{full_file_path}' is a hidden file and will be skipped.")
-            continue
-        
-        print(Fore.GREEN + f"\nAnalyzing file: {file_to_analyze}")
-        file_content = get_file_content(full_file_path)
-        analysis = analyze_file(file_to_analyze, file_content, description, technologies)
-        
-        print(Fore.GREEN + "\nFile Analysis:")
-        print(Fore.GREEN + analysis)
-        
-        continue_analysis = input(Fore.YELLOW + "\nDo you want to analyze another file? (y/n): ")
-        if continue_analysis.lower() != 'y':
-            break
-    
+
     print(Fore.GREEN + "\nCodebase Review Summary:")
     print(Fore.GREEN + f"Description: {description}")
     print(Fore.GREEN + f"Technologies: {technologies}")
@@ -248,7 +175,7 @@ def step_3_agentic(description, technologies, root_folder):
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
 
 def step_4_action():
-    print(Fore.BLUE + "Step 4 Action: Analyzing file...")
+    print(Fore.BLUE + "Step 4 Action: TBD")
 
 def step_5_learn():
     print(Fore.BLUE + "Step 5 Learn: No learning step in this workflow.")
