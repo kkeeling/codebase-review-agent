@@ -46,7 +46,7 @@ def validate_input(description: str, technologies: str, root_folder: str) -> boo
     
     return True
 
-def analyze_codebase_structure(root_folder: str) -> Dict[str, Any]:
+def analyze_codebase_structure(root_folder: str, description: str) -> Dict[str, Any]:
     file_count = 0
     total_lines = 0
     file_types = {}
@@ -178,7 +178,7 @@ def step_3_agentic(description, technologies, root_folder):
 
     # Analyze codebase structure
     with Halo(text='Analyzing codebase structure...', spinner='dots'):
-        codebase_analysis = analyze_codebase_structure(root_folder)
+        codebase_analysis = analyze_codebase_structure(root_folder, description)
 
     print(Fore.GREEN + "\nCodebase Review Summary:")
     print(Fore.GREEN + f"Description: {description}")
