@@ -183,6 +183,7 @@ Your analysis should be thorough and provide valuable insights for the developme
 
 def run_sequential_agentic_flow():
     step_1_triggering()
+    step_2_retrieval()
     
     description, technologies, root_folder = get_user_input()
     
