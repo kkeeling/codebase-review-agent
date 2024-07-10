@@ -1,3 +1,4 @@
+import json
 import os
 from anthropic import Anthropic
 
@@ -15,8 +16,6 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
     client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
     system_prompt = load_system_prompt()
-
-    import json
 
     user_prompt = f"""Analyze the following codebase:
     
