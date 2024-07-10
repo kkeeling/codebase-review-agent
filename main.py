@@ -16,8 +16,7 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:
     raise ValueError("Please set the ANTHROPIC_API_KEY environment variable.")
 
-ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
-MODEL_NAME = "claude-3-sonnet-20240229"
+MODEL_NAME = "claude-3-5-sonnet-20240620"
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
