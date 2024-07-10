@@ -29,8 +29,8 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
         response = client.messages.create(
             model=MODEL_NAME,
             max_tokens=4096,
+            system=system_prompt,
             messages=[
-                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ]
         )
