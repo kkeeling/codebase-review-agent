@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from anthropic import Anthropic
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
@@ -24,6 +25,14 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
     Codebase details:
     {json.dumps(codebase, indent=2, default=str)}
     """
+
+    # Write user_prompt to log file
+    epoch_time = int(time.time())
+    log_dir = "logs"
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"session_{epoch_time}.log")
+    with open(log_file, "w") as f:
+        f.write(user_prompt)
     try:
         response = client.messages.create(
             model=MODEL_NAME,
