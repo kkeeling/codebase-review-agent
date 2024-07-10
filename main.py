@@ -11,13 +11,6 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 # Initialize colorama
 init(autoreset=True)
 
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
-if not ANTHROPIC_API_KEY:
-    raise ValueError("Please set the ANTHROPIC_API_KEY environment variable.")
-
-ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
-MODEL_NAME = "claude-3-sonnet-20240229"
-
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
     raise ValueError("Please set the GOOGLE_API_KEY environment variable.")
@@ -150,9 +143,6 @@ def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str
 
     return response.text
 
-def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> str:
-    # TODO: Implement analysis using Anthropic Claude API
-    pass
 
 def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
