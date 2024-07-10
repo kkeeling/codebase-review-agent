@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import requests
 from anthropic import Anthropic
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
@@ -10,8 +11,12 @@ if not ANTHROPIC_API_KEY:
 MODEL_NAME = "claude-3-sonnet-20240229"  # Update this to the correct model name
 
 def load_system_prompt():
-    with open("system_prompt.md", "r") as file:
-        return file.read()
+    url = "https://raw.githubusercontent.com/kkeeling/codebase-review-agent/main/models/claude/system_prompt.md"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.text
+    else:
+        raise Exception(f"Failed to fetch system prompt. Status code: {response.status_code}")
 
 def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> str:
     client = Anthropic(api_key=ANTHROPIC_API_KEY)
