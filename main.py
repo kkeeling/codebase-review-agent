@@ -5,8 +5,8 @@ import requests
 from typing import List, Dict, Any
 from colorama import init, Fore, Style
 from halo import Halo
-from claude_analysis import analyze_codebase_with_anthropic_claude
-from gemini_analysis import analyze_codebase_with_google_gemini
+from models.claude.claude_analysis import analyze_codebase_with_anthropic_claude
+from models.gemini.gemini_analysis import analyze_codebase_with_google_gemini
 
 # Initialize colorama
 init(autoreset=True)
