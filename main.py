@@ -134,6 +134,11 @@ def step_3_agentic(description, root_folder, model_choice):
     print(Fore.YELLOW + "\nCodebase Analysis (JSON):")
     print(json.dumps(codebase_analysis, indent=2, default=str))
 
+    # Write codebase_analysis to a file
+    with open("code_analysis.json", "w") as f:
+        json.dump(codebase_analysis, f, indent=2, default=str)
+    print(Fore.GREEN + "\nCodebase analysis written to code_analysis.json")
+
     if model_choice == 'claude':
         print(Fore.GREEN + "\nClaude 3.5 Sonnet Analysis:")
         with Halo(text='Analyzing with Claude...', spinner='dots'):
