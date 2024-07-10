@@ -161,7 +161,7 @@ def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str
 def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> str:
     client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    prompt = f"{HUMAN_PROMPT}Analyze the following codebase:
+    prompt = f"""{HUMAN_PROMPT}Analyze the following codebase:
 
     Description: {description}
     Total files: {codebase['file_count']}
@@ -175,7 +175,7 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
     4. Suggestions for better code maintainability and scalability
     
     Here's a sample of the code files:
-    "
+    """
 
     # Add up to 5 file contents to the prompt
     for file in codebase['file_list'][:5]:
