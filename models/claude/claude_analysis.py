@@ -33,6 +33,7 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
     log_file = os.path.join(log_dir, f"session_{epoch_time}.log")
     with open(log_file, "w") as f:
         f.write(user_prompt)
+        
     try:
         response = client.messages.create(
             model=MODEL_NAME,

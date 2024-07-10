@@ -75,8 +75,7 @@ def analyze_codebase_structure(root_folder: str, description: str) -> Dict[str, 
                     total_lines += content.count('\n') + 1
                     file_list.append({"path": relative_path, "contents": content})
             except Exception as e:
-                print(Fore.YELLOW + f"Warning: Could not read file {file_path}. Error: {str(e)}")
-                file_list.append({"path": relative_path, "contents": f"Error: Unable to read file. {str(e)}"})
+                print(Fore.YELLOW + f"\nWarning: Could not read file {file_path}. Error: {str(e)}")
 
     codebase_analysis = {
         "file_count": file_count,
@@ -84,10 +83,6 @@ def analyze_codebase_structure(root_folder: str, description: str) -> Dict[str, 
         "file_types": file_types,
         "file_list": file_list
     }
-
-    # Analyze codebase with Google Gemini
-    gemini_analysis = analyze_codebase_with_google_gemini(description, codebase_analysis)
-    codebase_analysis["gemini_analysis"] = gemini_analysis
 
     return codebase_analysis
 
@@ -129,10 +124,6 @@ def step_3_agentic(description, root_folder, model_choice):
 
     for ext, count in sorted(codebase_analysis['file_types'].items(), key=lambda x: x[1], reverse=True):
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
-
-    # Print codebase_analysis as pretty JSON
-    print(Fore.YELLOW + "\nCodebase Analysis (JSON):")
-    print(json.dumps(codebase_analysis, indent=2, default=str))
 
     # Write codebase_analysis to a file
     with open("code_analysis.json", "w") as f:
