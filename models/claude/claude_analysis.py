@@ -7,34 +7,35 @@ if not ANTHROPIC_API_KEY:
 
 MODEL_NAME = "claude-3-sonnet-20240229"  # Update this to the correct model name
 
+def load_system_prompt():
+    with open("system_prompt.md", "r") as file:
+        return file.read()
+
 def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> str:
     client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    prompt = f"""Analyze the following codebase:
+    system_prompt = load_system_prompt()
+
+    user_prompt = f"""Analyze the following codebase:
     
     Description: {description}
     Total files: {codebase['file_count']}
     Total lines of code: {codebase['total_lines']}
     File types distribution: {codebase['file_types']}
     
-    Please provide a comprehensive analysis of the codebase, including:
-    1. Overall structure and organization
-    2. Potential improvements or best practices that could be applied
-    3. Any security concerns or performance issues
-    4. Suggestions for better code maintainability and scalability
-    
     Here's a sample of the code files:
     """
     
     for file in codebase['file_list'][:5]:  # Limit to 5 files to avoid exceeding token limits
-        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
+        user_prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
 
     try:
         response = client.messages.create(
             model=MODEL_NAME,
             max_tokens=4096,
             messages=[
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
             ]
         )
         return response.content[0].text
