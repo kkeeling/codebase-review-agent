@@ -234,10 +234,12 @@ def step_3_agentic(description, root_folder, model_choice):
 
     if model_choice == 'claude':
         print(Fore.GREEN + "\nClaude 3.5 Sonnet Analysis:")
-        analysis = analyze_codebase_with_anthropic_claude(description, codebase_analysis)
+        with Halo(text='Analyzing with Claude...', spinner='dots'):
+            analysis = analyze_codebase_with_anthropic_claude(description, codebase_analysis)
     else:
         print(Fore.GREEN + "\nGoogle Gemini Analysis:")
-        analysis = analyze_codebase_with_google_gemini(description, codebase_analysis)
+        with Halo(text='Analyzing with Gemini...', spinner='dots'):
+            analysis = analyze_codebase_with_google_gemini(description, codebase_analysis)
 
     print(Fore.GREEN + analysis)
 
