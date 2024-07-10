@@ -150,6 +150,10 @@ def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str
 
     return response.text
 
+def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> str:
+    # TODO: Implement analysis using Anthropic Claude API
+    pass
+
 def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
 
