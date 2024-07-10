@@ -124,9 +124,8 @@ def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str
     Here's a sample of the code files:
     """
     
-    # Add up to 5 file contents to the prompt
     for file in codebase['file_list']:
-        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
+        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents']}...\n```"
     
     safety_settings = [
         {
@@ -179,9 +178,8 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
     Here's a sample of the code files:
     """
 
-    # Add up to 5 file contents to the prompt
-    for file in codebase['file_list'][:5]:
-        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
+    for file in codebase['file_list']:
+        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents']}...\n```"
 
     prompt += f"\n{AI_PROMPT}"
 
