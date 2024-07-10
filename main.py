@@ -201,8 +201,8 @@ def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
 
     step_1_triggering()
-    description, root_folder = step_2_retrieval()
-    step_3_agentic(description, root_folder)
+    description, root_folder, model_choice = step_2_retrieval()
+    step_3_agentic(description, root_folder, model_choice)
     step_4_action()
     step_5_learn()
     step_6_notify()
@@ -214,11 +214,11 @@ def step_2_retrieval():
     print(Fore.BLUE + "Step 2 Retrieval: Retrieving user input...")
 
     while True:
-        description, root_folder = get_user_input()
+        description, root_folder, model_choice = get_user_input()
         if validate_input(description, root_folder):
-            return description, root_folder
+            return description, root_folder, model_choice
 
-def step_3_agentic(description, root_folder):
+def step_3_agentic(description, root_folder, model_choice):
     print(Fore.BLUE + "Step 3 Agentic: Analyzing codebase structure...")
 
     # Analyze codebase structure
@@ -235,12 +235,14 @@ def step_3_agentic(description, root_folder):
     for ext, count in sorted(codebase_analysis['file_types'].items(), key=lambda x: x[1], reverse=True):
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
 
-    print(Fore.GREEN + "\nGoogle Gemini Analysis:")
-    print(Fore.GREEN + codebase_analysis['gemini_analysis'])
+    if model_choice == 'claude':
+        print(Fore.GREEN + "\nClaude 3.5 Sonnet Analysis:")
+        analysis = analyze_codebase_with_anthropic_claude(description, codebase_analysis)
+    else:
+        print(Fore.GREEN + "\nGoogle Gemini Analysis:")
+        analysis = analyze_codebase_with_google_gemini(description, codebase_analysis)
 
-    print(Fore.GREEN + "\nClaude 3.5 Sonnet Analysis:")
-    claude_analysis = analyze_codebase_with_anthropic_claude(description, codebase_analysis)
-    print(Fore.GREEN + claude_analysis)
+    print(Fore.GREEN + analysis)
 
 def step_4_action():
     print(Fore.BLUE + "Step 4 Action: TBD")
