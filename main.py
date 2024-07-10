@@ -5,18 +5,12 @@ import requests
 from typing import List, Dict, Any
 from colorama import init, Fore, Style
 from halo import Halo
-import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
 from claude_analysis import analyze_codebase_with_anthropic_claude
+from gemini_analysis import analyze_codebase_with_google_gemini
 
 # Initialize colorama
 init(autoreset=True)
 
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-if not GOOGLE_API_KEY:
-    raise ValueError("Please set the GOOGLE_API_KEY environment variable.")
-
-genai.configure(api_key=GOOGLE_API_KEY)
 
 def get_user_input():
     print(Fore.GREEN + "Welcome to the Interactive Codebase Review Agent!")
@@ -96,61 +90,6 @@ def analyze_codebase_structure(root_folder: str, description: str) -> Dict[str, 
     codebase_analysis["gemini_analysis"] = gemini_analysis
 
     return codebase_analysis
-
-def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str:
-    model = genai.GenerativeModel('gemini-pro')
-    
-    prompt = f"""
-    Analyze the following codebase:
-    
-    Description: {description}
-    Total files: {codebase['file_count']}
-    Total lines of code: {codebase['total_lines']}
-    File types distribution: {codebase['file_types']}
-    
-    Please provide a comprehensive analysis of the codebase, including:
-    1. Overall structure and organization
-    2. Potential improvements or best practices that could be applied
-    3. Any security concerns or performance issues
-    4. Suggestions for better code maintainability and scalability
-    
-    Here's a sample of the code files:
-    """
-    
-    for file in codebase['file_list']:
-        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents']}...\n```"
-    
-    safety_settings = [
-        {
-            "category": HarmCategory.HARM_CATEGORY_HARASSMENT,
-            "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            "category": HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            "category": HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            "category": HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-    ]
-
-    response = model.generate_content(
-        prompt,
-        safety_settings=safety_settings,
-        generation_config=genai.types.GenerationConfig(
-            temperature=0.2,
-            top_p=1,
-            top_k=32,
-            max_output_tokens=2048,
-        )
-    )
-
-    return response.text
 
 
 def run_sequential_agentic_flow():
