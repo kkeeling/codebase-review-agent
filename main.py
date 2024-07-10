@@ -130,6 +130,10 @@ def step_3_agentic(description, root_folder, model_choice):
     for ext, count in sorted(codebase_analysis['file_types'].items(), key=lambda x: x[1], reverse=True):
         print(Fore.GREEN + f"  {ext or 'No extension'}: {count}")
 
+    # Print codebase_analysis as pretty JSON
+    print(Fore.YELLOW + "\nCodebase Analysis (JSON):")
+    print(json.dumps(codebase_analysis, indent=2, default=str))
+
     if model_choice == 'claude':
         print(Fore.GREEN + "\nClaude 3.5 Sonnet Analysis:")
         with Halo(text='Analyzing with Claude...', spinner='dots'):
