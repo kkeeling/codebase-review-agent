@@ -33,11 +33,13 @@ def get_user_input():
     root_folder = input(Fore.YELLOW + "2. Root folder of the project on your local file system: ")
     
     while True:
-        model_choice = input(Fore.YELLOW + "3. Choose the model to use (gemini/claude): ").lower()
+        model_choice = input(Fore.YELLOW + "3. Choose the model to use (gemini/claude) [default: claude]: ").lower()
+        if model_choice == '':
+            model_choice = 'claude'
         if model_choice in ['gemini', 'claude']:
             break
         else:
-            print(Fore.RED + "Invalid choice. Please enter 'gemini' or 'claude'.")
+            print(Fore.RED + "Invalid choice. Please enter 'gemini' or 'claude', or press Enter for the default (claude).")
     
     return description, root_folder, model_choice
 
