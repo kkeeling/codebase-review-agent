@@ -16,12 +16,14 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
 
     system_prompt = load_system_prompt()
 
+    import json
+
     user_prompt = f"""Analyze the following codebase:
     
     Description: {description}
-    Total files: {codebase['file_count']}
-    Total lines of code: {codebase['total_lines']}
-    File types distribution: {codebase['file_types']}
+    
+    Codebase analysis:
+    {json.dumps(codebase, indent=2, default=str)}
     
     Here's a sample of the code files:
     """
