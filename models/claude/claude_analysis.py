@@ -22,15 +22,9 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
     
     Description: {description}
     
-    Codebase analysis:
+    Codebase details:
     {json.dumps(codebase, indent=2, default=str)}
-    
-    Here's a sample of the code files:
     """
-    
-    for file in codebase['file_list'][:5]:  # Limit to 5 files to avoid exceeding token limits
-        user_prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
-
     try:
         response = client.messages.create(
             model=MODEL_NAME,
