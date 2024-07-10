@@ -7,9 +7,17 @@ from colorama import init, Fore, Style
 from halo import Halo
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
 # Initialize colorama
 init(autoreset=True)
+
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+if not ANTHROPIC_API_KEY:
+    raise ValueError("Please set the ANTHROPIC_API_KEY environment variable.")
+
+ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
+MODEL_NAME = "claude-3-sonnet-20240229"
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
@@ -143,6 +151,42 @@ def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str
 
     return response.text
 
+def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> str:
+    client = Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    prompt = f"{HUMAN_PROMPT}Analyze the following codebase:
+
+    Description: {description}
+    Total files: {codebase['file_count']}
+    Total lines of code: {codebase['total_lines']}
+    File types distribution: {codebase['file_types']}
+    
+    Please provide a comprehensive analysis of the codebase, including:
+    1. Overall structure and organization
+    2. Potential improvements or best practices that could be applied
+    3. Any security concerns or performance issues
+    4. Suggestions for better code maintainability and scalability
+    
+    Here's a sample of the code files:
+    "
+
+    # Add up to 5 file contents to the prompt
+    for file in codebase['file_list'][:5]:
+        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
+
+    prompt += f"\n{AI_PROMPT}"
+
+    try:
+        response = client.completions.create(
+            model=MODEL_NAME,
+            prompt=prompt,
+            max_tokens_to_sample=4096,
+            temperature=0.2,
+        )
+        return response.completion
+    except Exception as e:
+        print(Fore.RED + f"Error calling Anthropic API: {str(e)}")
+        return "Error: Unable to analyze codebase with Claude."
 
 def run_sequential_agentic_flow():
     print(Fore.BLUE + "Running sequential agentic flow...")
@@ -184,6 +228,10 @@ def step_3_agentic(description, root_folder):
 
     print(Fore.GREEN + "\nGoogle Gemini Analysis:")
     print(Fore.GREEN + codebase_analysis['gemini_analysis'])
+
+    print(Fore.GREEN + "\nClaude 3.5 Sonnet Analysis:")
+    claude_analysis = analyze_codebase_with_anthropic_claude(description, codebase_analysis)
+    print(Fore.GREEN + claude_analysis)
 
 def step_4_action():
     print(Fore.BLUE + "Step 4 Action: TBD")
