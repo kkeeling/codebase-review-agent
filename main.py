@@ -7,7 +7,7 @@ from colorama import init, Fore, Style
 from halo import Halo
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import Anthropic
 
 # Initialize colorama
 init(autoreset=True)
@@ -16,7 +16,7 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:
     raise ValueError("Please set the ANTHROPIC_API_KEY environment variable.")
 
-MODEL_NAME = "claude-3-5-sonnet-20240620"
+MODEL_NAME = "claude-3-sonnet-20240229"  # Update this to the correct model name
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
@@ -161,8 +161,8 @@ def analyze_codebase_with_google_gemini(description: str, codebase: dict) -> str
 def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> str:
     client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    prompt = f"""{HUMAN_PROMPT}Analyze the following codebase:
-
+    prompt = f"""Analyze the following codebase:
+    
     Description: {description}
     Total files: {codebase['file_count']}
     Total lines of code: {codebase['total_lines']}
@@ -176,20 +176,19 @@ def analyze_codebase_with_anthropic_claude(description: str, codebase: dict) -> 
     
     Here's a sample of the code files:
     """
-
-    for file in codebase['file_list']:
-        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents']}...\n```"
-
-    prompt += f"\n{AI_PROMPT}"
+    
+    for file in codebase['file_list'][:5]:  # Limit to 5 files to avoid exceeding token limits
+        prompt += f"\n\nFile: {file['path']}\n```\n{file['contents'][:1000]}...\n```"
 
     try:
-        response = client.completions.create(
+        response = client.messages.create(
             model=MODEL_NAME,
-            prompt=prompt,
-            max_tokens_to_sample=4096,
-            temperature=0.2,
+            max_tokens=4096,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
         )
-        return response.completion
+        return response.content[0].text
     except Exception as e:
         print(Fore.RED + f"Error calling Anthropic API: {str(e)}")
         return "Error: Unable to analyze codebase with Claude."
