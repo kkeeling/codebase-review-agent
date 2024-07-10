@@ -32,7 +32,14 @@ def get_user_input():
     description = input(Fore.YELLOW + "1. Brief description of the codebase, including the type of application: ")
     root_folder = input(Fore.YELLOW + "2. Root folder of the project on your local file system: ")
     
-    return description, root_folder
+    while True:
+        model_choice = input(Fore.YELLOW + "3. Choose the model to use (gemini/claude): ").lower()
+        if model_choice in ['gemini', 'claude']:
+            break
+        else:
+            print(Fore.RED + "Invalid choice. Please enter 'gemini' or 'claude'.")
+    
+    return description, root_folder, model_choice
 
 def validate_input(description: str, root_folder: str) -> bool:
     if not description or not root_folder:
